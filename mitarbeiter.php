@@ -1,5 +1,8 @@
 <?php 
 require "includes/conn.inc.php";
+
+// IF NO POST DATA IS SENT SET KEYS TO EMPTY STRING
+// PREVENTS FROM GETTING UNDEFINED ARRAY KEY ERROR IF PAGE GETS LOADED WITHOUT POST DATA
 if(count($_POST)==0) {
     $_POST["NN_MA"] = "";
     $_POST["VN_MA"] = "";
@@ -19,7 +22,8 @@ if(count($_POST)==0) {
             <legend>Mitarbeiter</legend>
             <label>
                 Nachname:
-                <input type="text" name="NN_MA" value="<?php echo($_POST["NN_MA"]); ?>">
+                <!-- OUTPUT SEARCH VALUE AFTER FILTER BUTTON GETS CLICKED -->
+                <input type="text" name="NN_MA" value="<?php echo($_POST["NN_MA"]); ?>">  
             </label>
             <label>
                 Vorname:
@@ -40,51 +44,43 @@ if(count($_POST)==0) {
         <button type="submit">Filtern</button>
     </form>
         <?php
+            echo "<ul>";
+            // CREATE WHERE CLAUSE FILTER
             $where = "";
             $arr_W = [];
             if (count($_POST) > 0) {
                 if(strlen($_POST["NN_MA"]) > 0) {
-                    // $arr_W[] = "tbl_mitarbeiter.Vorname='" . $_POST["VN_MA"] . "'";
                     $arr_W[] = "tbl_mitarbeiter.Nachname='" . $_POST["NN_MA"] . "'";
                 }
                 if(strlen($_POST["VN_MA"]) > 0) {
-                    // $arr_W[] = "tbl_mitarbeiter.Vorname='" . $_POST["VN_MA"] . "'";
                     $arr_W[] = "tbl_mitarbeiter.Vorname='" . $_POST["VN_MA"] . "'";
                 }
                 if (count($arr_W) > 0 ) {
-                    
                     $where = " 
                         WHERE " . implode(" AND ", $arr_W) . "
                     ";
-
                 }
             }
             $mainSql = "
                 SELECT * FROM tbl_mitarbeiter " . $where . "ORDER BY NACHNAME ASC, VORNAME ASC
             ";
-            echo "<ul>";
-            
             $conn = openConn();
-            $workerList = $conn->query($mainSql);
+            $workerList = $conn->query($mainSql) or die ("Fehler in der query " . $conn->error);
             while ($worker = $workerList->fetch_object()) {
-
                 echo "<li>";
                     echo $worker->Vorname . " ";
                     echo $worker->Nachname . " ";
-
-
+                    // CREATE WHERE CLAUSE FOR
+                    // FIDMitarbeiter IS DEFAULT IN ARRAY
                     $arr_W = ["FIDMitarbeiter=" . $worker->IDMitarbeiter];
                     if(count($_POST)>0) {
-
                         if(strlen($_POST["NN_KD"]) > 0) {
                             $arr_W[] = "tbl_kunden.Nachname='" . $_POST["NN_KD"] . "'";
                         }
                         if(strlen($_POST["VN_KD"]) > 0) {
                             $arr_W[] = "tbl_kunden.Vorname='" . $_POST["VN_KD"] . "'";
                         }
-
                     }
-
                     $sql = "
                         SELECT 
                             tbl_einsatz.Startzeitpunkt,
@@ -99,12 +95,7 @@ if(count($_POST)==0) {
                         WHERE " . implode(" AND " ,$arr_W) .
                         " ORDER BY tbl_einsatz.Startzeitpunkt ASC
                     ";
-                    // echo "<br>";
-                    // echo $sql;
-                    // return;
-
                     $einsätze = $conn->query($sql) or die ("Fehler in der query " . $conn->error);
-
                     while ($einsatz = $einsätze->fetch_object()) {
                         echo "<ul>";
                             echo "<li>";
@@ -116,21 +107,11 @@ if(count($_POST)==0) {
                                 echo $einsatz->Adresse . " / ";
                                 echo $einsatz->PLZ . " ";
                                 echo $einsatz->Ort . ")";
-
-
-
                             echo "</li>";
                         echo "</ul>";
                     }
-
-
-
-
-
                 echo "</li>";
             }
-
-
             echo "</ul>";
         ?>
     </body>
