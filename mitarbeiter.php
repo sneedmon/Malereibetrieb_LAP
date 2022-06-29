@@ -1,6 +1,11 @@
 <?php 
 require "includes/conn.inc.php";
-
+if(count($_POST)==0) {
+    $_POST["NN_MA"] = "";
+    $_POST["VN_MA"] = "";
+    $_POST["NN_KD"] = "";
+    $_POST["VN_KD"] = "";
+}
 ?>
 <!DOCTYPE html>
     <html lang="en">
@@ -14,22 +19,22 @@ require "includes/conn.inc.php";
             <legend>Mitarbeiter</legend>
             <label>
                 Nachname:
-                <input type="text" name="NN_MA" value="">
+                <input type="text" name="NN_MA" value="<?php echo($_POST["NN_MA"]); ?>">
             </label>
             <label>
                 Vorname:
-                <input type="text" name="VN_MA" value="">
+                <input type="text" name="VN_MA" value="<?php echo($_POST["VN_MA"]); ?>">
             </label>
         </fieldset>
         <fieldset>
             <legend>Kunde</legend>
             <label>
                 Nachname:
-                <input type="text" name="NN_KD" value="">
+                <input type="text" name="NN_KD" value="<?php echo($_POST["NN_KD"]); ?>">
             </label>
             <label>
                 Vorname:
-                <input type="text" name="VN_KD" value="">
+                <input type="text" name="VN_KD" value="<?php echo($_POST["VN_KD"]); ?>">
             </label>
         </fieldset>
         <button type="submit">Filtern</button>
@@ -67,14 +72,18 @@ require "includes/conn.inc.php";
                     echo $worker->Vorname . " ";
                     echo $worker->Nachname . " ";
 
-                    $arr_W = ["FIDMitarbeiter=" . $worker->IDMitarbeiter];
-                    if(strlen($_POST["NN_KD"]) > 0) {
-                        $arr_W[] = "tbl_kunden.Nachname='" . $_POST["NN_KD"] . "'";
-                    }
-                    if(strlen($_POST["VN_KD"]) > 0) {
-                        $arr_W[] = "tbl_kunden.Vorname='" . $_POST["VN_KD"] . "'";
-                    }
 
+                    $arr_W = ["FIDMitarbeiter=" . $worker->IDMitarbeiter];
+                    if(count($_POST)>0) {
+
+                        if(strlen($_POST["NN_KD"]) > 0) {
+                            $arr_W[] = "tbl_kunden.Nachname='" . $_POST["NN_KD"] . "'";
+                        }
+                        if(strlen($_POST["VN_KD"]) > 0) {
+                            $arr_W[] = "tbl_kunden.Vorname='" . $_POST["VN_KD"] . "'";
+                        }
+
+                    }
 
                     $sql = "
                         SELECT 
@@ -90,9 +99,9 @@ require "includes/conn.inc.php";
                         WHERE " . implode(" AND " ,$arr_W) .
                         " ORDER BY tbl_einsatz.Startzeitpunkt ASC
                     ";
-                    echo "<br>";
-                    echo $sql;
-                    return;
+                    // echo "<br>";
+                    // echo $sql;
+                    // return;
 
                     $einsätze = $conn->query($sql) or die ("Fehler in der query " . $conn->error);
 
