@@ -1,0 +1,15 @@
+Beziehungen:
+tbl_buecher:
+ tbl_buecher.FID_Verlag als n:1 auf tbl_Verlage.IDVerlag mit SET NULL
+(oder RESTRICT – je nach Auffassung) bei Löschung (Buch muss erhalten
+bleiben, auch wenn der Verlag gelöscht wird) und CASCADE bei
+Aktualisierung.
+o tbl_verlage.FIDStaat als n:1 auf tbl_staaten.IDStaat mit SET NULL bei
+Löschung und CASCADE bei Aktualisierung.
+ tbl_autoren_buecher:
+o tbl_autoren_buecher.FIDAutor als n:1 auf tbl_autoren.IDAutor mit
+RESTRICT bei Löschung (Autoren, die Büchern zugeordnet sind, dürfen nicht
+gelöscht werden können, da sie essenzieller "Bestandteil" eines Buches sind)
+und CASCADE bei Aktualisierung.
+o tbl_autoren_buecher.FIDBuch als n:1 auf tbl_buecher.IDBuch mit Löschund Aktualisierungsweitergabe (CASCADE), da die Zuweisung eines Autors
+433
